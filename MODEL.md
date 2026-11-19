@@ -47,4 +47,7 @@ The projector is part of the same upstream GGUF repository as the language model
 - GGUF runtime metadata previously validated with Ollama: `architecture qwen3vl`, `Q4_K_M`, `vision` capability, compatible `clip` projector.
 - Docker Model Runner CLI `v1.2.6` / server `v1.2.8` available and running on this host.
 - OpenAI-compatible endpoint probed: `GET http://localhost:12434/engines/llama.cpp/v1/models` returned HTTP `200`.
-- Docker Hub push and second-machine pull are not verified yet; no credentials were provided and no push was attempted.
+- OCI artifact pushed to `localhost:5000/vision-qwen:2b-q4`, pulled locally, and inspected as `architecture qwen3vl`, `1.72B`, `MOSTLY_Q4_K_M`, context `4096`, size `1.03GiB`.
+- `docker model run localhost:5000/vision-qwen:2b-q4 "Reply with OK."` installed the `llama.cpp` backend and returned `OK`.
+- Vision inference via the OpenAI-compatible API correctly described `linknet-logo.png`.
+- Docker Hub push and second-machine pull are not verified yet.

@@ -35,6 +35,23 @@ Override if needed:
 MODEL_DIR=/var/tmp/qwen-model CONTEXT_SIZE=4096 TARGET=docker.io/snipkode/vision-qwen:2b-q4 ./build.sh
 ```
 
+## Local OCI smoke test
+
+On Docker Desktop for Windows, direct local `docker model package` loading can fail with `missing blob ... refusing to write unless all blobs exist`. Push to a local OCI registry, then pull it back into Model Runner:
+
+```bash
+docker run -d --name model-registry -p 5000:5000 registry:2
+docker model package \
+  --gguf /path/to/Qwen3VL-2B-Instruct-Q4_K_M.gguf \
+  --mmproj /path/to/mmproj-Qwen3VL-2B-Instruct-Q8_0.gguf \
+  --context-size 4096 \
+  --license ./LICENSE \
+  --push localhost:5000/vision-qwen:2b-q4
+docker model pull localhost:5000/vision-qwen:2b-q4
+docker model run localhost:5000/vision-qwen:2b-q4 "Reply with OK."
+MODEL_REF=localhost:5000/vision-qwen:2b-q4 ./test-vision.sh /path/to/image.png
+```
+
 ## Publish
 
 Requires Docker Hub authentication for the `snipkode` namespace.
@@ -44,7 +61,11 @@ export DOCKERHUB_USERNAME=snipkode
 ./publish.sh
 ```
 
-The script runs `docker model push` and then `docker model inspect --remote` against `docker.io/snipkode/vision-qwen:2b-q4`.
+The script optionally tags a local artifact with `SOURCE` before pushing, then runs `docker model push` and `docker model inspect --remote` against `docker.io/snipkode/vision-qwen:2b-q4`.
+
+```bash
+SOURCE=localhost:5000/vision-qwen:2b-q4 ./publish.sh
+```
 
 ## Deploy on another Ubuntu machine
 
@@ -102,13 +123,15 @@ Verified on this host:
 
 - Docker Model Runner CLI/server available and running.
 - `docker model package` supports `--gguf`, `--mmproj`, `--context-size`, and `--license`.
-- OpenAI-compatible `/models` endpoint returned HTTP `200`.
 - Source GGUF and projector hashes recorded in `checksums.txt`.
+- OCI artifact pushed to local registry `localhost:5000/vision-qwen:2b-q4` and pulled into Model Runner.
+- Local artifact inspected as `architecture qwen3vl`, `1.72B`, `MOSTLY_Q4_K_M`, context `4096`, size `1.03GiB`.
+- Text inference via `docker model run` returned `OK`.
+- Vision inference via the OpenAI-compatible API correctly described `linknet-logo.png`.
 
 Not verified yet:
 
 - Push to Docker Hub.
 - Pull from a second machine.
-- End-to-end image analysis through the packaged artifact.
 
-These require Docker Hub credentials for `alam` and a second Ubuntu host, and are not simulated by the scripts.
+These require Docker Hub credentials for `snipkode` and a second Ubuntu host, and are not simulated by the scripts.
