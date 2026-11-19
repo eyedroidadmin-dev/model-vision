@@ -1,0 +1,2 @@
+089d75c52f4b7ffc56ba998ffc50aae89fcafc755f9e7208aacca281dca6c2ae  Qwen3VL-2B-Instruct-Q4_K_M.gguf
+f9a68fabba69c3b81e153367b2c7521030b0fa8bb0de400c9599c8e6725f9c82  mmproj-Qwen3VL-2B-Instruct-Q8_0.gguf
